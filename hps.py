@@ -12,6 +12,21 @@ class Hyperparams(dict):
         self[attr] = value
 
 
+abstractart = Hyperparams()
+abstractart.width = 384
+abstractart.lr = 0.0002
+abstractart.zdim = 16
+abstractart.wd = 0.01
+abstractart.dec_blocks = "1x1,4m1,4x2,8m4,8x5,16m8,16x10,32m16,32x21"
+abstractart.warmup_iters = 100
+abstractart.dataset = 'abstractart'
+abstractart.n_batch = 16
+abstractart.ema_rate = 0.9999
+abstractart.image_channels = 3
+abstractart.image_size = 64
+HPARAMS_REGISTRY['abstractart'] = abstractart
+
+
 cifar10 = Hyperparams()
 cifar10.width = 384
 cifar10.lr = 0.0002
@@ -186,4 +201,6 @@ def add_vae_arguments(parser):
     parser.add_argument('--change_threshold', type=float, default=0.17)
     parser.add_argument('--change_coef', type=float, default=0.04)
     parser.add_argument('--n_mpl', type=int, default=8)
+    parser.add_argument('--image_size', type=int, default=64)
+    parser.add_argument('--image_channels', type=int, default=3)
     return parser

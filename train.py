@@ -1,16 +1,22 @@
-# This is a sample Python script.
+import torch
+import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
+from torchvision.datasets import ImageFolder
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+from helpers import set_up_hyperparams
+from model import Model
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+def main():
+    H, logger = set_up_hyperparams()
+    model = Model(H).cuda()
+    model = torch.nn.DataParallel(model)
+    train_data = ImageFolder(H.data_root, transforms.ToTensor())
+    for data_train in DataLoader(train_data, batch_size=100):
+        with torch.no_grad():
+            res = model(data_train)
+            print(res)
+        break
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    main()
