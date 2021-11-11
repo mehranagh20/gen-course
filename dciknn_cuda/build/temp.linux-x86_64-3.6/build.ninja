@@ -1,0 +1,28 @@
+ninja_required_version = 1.3
+cxx = c++
+nvcc = /cvmfs/soft.computecanada.ca/easybuild/software/2020/Core/cudacore/10.2.89/bin/nvcc
+
+cflags = -pthread -B /home/mehranag/anaconda3/envs/env/compiler_compat -Wl,--sysroot=/ -Wsign-compare -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes -fPIC -I/lustre03/project/6054857/mehranag/HyperRIM/code/dciknn_cuda/include -I/home/mehranag/anaconda3/envs/env/lib/python3.6/site-packages/torch/include -I/home/mehranag/anaconda3/envs/env/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/home/mehranag/anaconda3/envs/env/lib/python3.6/site-packages/torch/include/TH -I/home/mehranag/anaconda3/envs/env/lib/python3.6/site-packages/torch/include/THC -I/cvmfs/soft.computecanada.ca/easybuild/software/2020/Core/cudacore/10.2.89/include -I/home/mehranag/anaconda3/envs/env/include/python3.6m -c
+post_cflags = -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_dci_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++14
+cuda_cflags = -I/lustre03/project/6054857/mehranag/HyperRIM/code/dciknn_cuda/include -I/home/mehranag/anaconda3/envs/env/lib/python3.6/site-packages/torch/include -I/home/mehranag/anaconda3/envs/env/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/home/mehranag/anaconda3/envs/env/lib/python3.6/site-packages/torch/include/TH -I/home/mehranag/anaconda3/envs/env/lib/python3.6/site-packages/torch/include/THC -I/cvmfs/soft.computecanada.ca/easybuild/software/2020/Core/cudacore/10.2.89/include -I/home/mehranag/anaconda3/envs/env/include/python3.6m -c
+cuda_post_cflags = -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"'' -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_dci_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -gencode=arch=compute_70,code=sm_70 -std=c++14
+ldflags = 
+
+rule compile
+  command = $cxx -MMD -MF $out.d $cflags -c $in -o $out $post_cflags
+  depfile = $out.d
+  deps = gcc
+
+rule cuda_compile
+  command = $nvcc $cuda_cflags -c $in -o $out $cuda_post_cflags
+
+
+
+build /lustre03/project/6054857/mehranag/HyperRIM/code/dciknn_cuda/build/temp.linux-x86_64-3.6/./src/dci_cuda.o: compile /lustre03/project/6054857/mehranag/HyperRIM/code/dciknn_cuda/src/dci_cuda.cpp
+build /lustre03/project/6054857/mehranag/HyperRIM/code/dciknn_cuda/build/temp.linux-x86_64-3.6/./src/dci_cuda_kernel.o: cuda_compile /lustre03/project/6054857/mehranag/HyperRIM/code/dciknn_cuda/src/dci_cuda_kernel.cu
+build /lustre03/project/6054857/mehranag/HyperRIM/code/dciknn_cuda/build/temp.linux-x86_64-3.6/./src/util_kernel.o: cuda_compile /lustre03/project/6054857/mehranag/HyperRIM/code/dciknn_cuda/src/util_kernel.cu
+
+
+
+
+
