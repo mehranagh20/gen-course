@@ -100,17 +100,18 @@ class ModelBlock(nn.Module):
 class Model(nn.Module):
     def __init__(self, H):
         super().__init__()
+        self.dci_db = None
         self.H = H
         self.mapping_network = MappingNetowrk(code_dim=H.latent_dim, n_mlp=H.n_mpl)
         resos = set()
-        dec_blocks = []
+        architecture = []
         self.widths = get_width_settings(H.width, H.custom_width_str)
-        blocks = parse_layer_string(H.dec_blocks)
+        blocks = parse_layer_string(H.architecture)
         for idx, (res, mixin) in enumerate(blocks):
-            dec_blocks.append(ModelBlock(H, res, mixin, n_blocks=len(blocks)))
+            architecture.append(ModelBlock(H, res, mixin, n_blocks=len(blocks)))
             resos.add(res)
         self.resolutions = sorted(resos)
-        self.dec_blocks = nn.ModuleList(dec_blocks)
+        self.architecture = nn.ModuleList(architecture)
         first_res = self.resolutions[0]
         self.constant = nn.Parameter(torch.randn(1, self.widths[first_res], first_res, first_res))
         self.resnet = get_1x1(H.width, H.image_channels)
@@ -120,7 +121,7 @@ class Model(nn.Module):
     def forward(self, latent_code):
         w = self.mapping_network(latent_code)[0]
         x = self.constant.repeat(latent_code.shape[0], 1, 1, 1)
-        for idx, block in enumerate(self.dec_blocks):
+        for idx, block in enumerate(self.architecture):
             x = block(x, w)
         return self.resnet(x)
         # x = self.gain * x + self.bias

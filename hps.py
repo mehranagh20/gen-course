@@ -17,7 +17,7 @@ abstractart.width = 384
 abstractart.lr = 0.0002
 abstractart.zdim = 16
 abstractart.wd = 0.01
-abstractart.dec_blocks = "1x1,4m1,4x2,8m4,8x5,16m8,16x10,32m16,32x21"
+abstractart.architecture = "4x3,8m4,8x5,16m8,16x10,32m16,32x16,64m32,64x10"
 abstractart.warmup_iters = 100
 abstractart.dataset = 'abstractart'
 abstractart.n_batch = 16
@@ -32,7 +32,7 @@ cifar10.width = 384
 cifar10.lr = 0.0002
 cifar10.zdim = 16
 cifar10.wd = 0.01
-cifar10.dec_blocks = "1x1,4m1,4x2,8m4,8x5,16m8,16x10,32m16,32x21"
+cifar10.architecture = "1x1,4m1,4x2,8m4,8x5,16m8,16x10,32m16,32x21"
 cifar10.enc_blocks = "32x11,32d2,16x6,16d2,8x6,8d2,4x3,4d4,1x3"
 cifar10.warmup_iters = 100
 cifar10.dataset = 'cifar10'
@@ -45,7 +45,7 @@ i32 = Hyperparams()
 i32.update(cifar10)
 i32.dataset = 'imagenet32'
 i32.ema_rate = 0.999
-i32.dec_blocks = "1x2,4m1,4x4,8m4,8x9,16m8,16x19,32m16,32x40"
+i32.architecture = "1x2,4m1,4x4,8m4,8x9,16m8,16x19,32m16,32x40"
 i32.enc_blocks = "32x15,32d2,16x9,16d2,8x8,8d2,4x6,4d4,1x6"
 i32.width = 512
 i32.n_batch = 8
@@ -62,7 +62,7 @@ i64.n_batch = 4
 i64.grad_clip = 220.0
 i64.skip_threshold = 380.0
 i64.dataset = 'imagenet64'
-i64.dec_blocks = "1x2,4m1,4x3,8m4,8x7,16m8,16x15,32m16,32x31,64m32,64x12"
+i64.architecture = "1x2,4m1,4x3,8m4,8x7,16m8,16x15,32m16,32x31,64m32,64x12"
 i64.enc_blocks = "64x11,64d2,32x20,32d2,16x9,16d2,8x8,8d2,4x7,4d4,1x5"
 HPARAMS_REGISTRY['imagenet64'] = i64
 
@@ -76,7 +76,7 @@ ffhq_256.epochs_per_eval_save = 1
 ffhq_256.num_images_visualize = 2
 ffhq_256.num_variables_visualize = 3
 ffhq_256.num_temperatures_visualize = 1
-ffhq_256.dec_blocks = "1x2,4m1,4x3,8m4,8x4,16m8,16x9,32m16,32x21,64m32,64x13,128m64,128x7,256m128"
+ffhq_256.architecture = "1x2,4m1,4x3,8m4,8x4,16m8,16x9,32m16,32x21,64m32,64x13,128m64,128x7,256m128"
 ffhq_256.enc_blocks = "256x3,256d2,128x8,128d2,64x12,64d2,32x17,32d2,16x7,16d2,8x5,8d2,4x5,4d4,1x4"
 ffhq_256.no_bias_above = 64
 ffhq_256.grad_clip = 130.
@@ -99,7 +99,7 @@ ffhq1024.skip_threshold = 500.
 ffhq1024.num_mixtures = 2
 ffhq1024.width = 16
 ffhq1024.lr = 0.00007
-ffhq1024.dec_blocks = "1x2,4m1,4x3,8m4,8x4,16m8,16x9,32m16,32x20,64m32,64x14,128m64,128x7,256m128,256x2,512m256,1024m512"
+ffhq1024.architecture = "1x2,4m1,4x3,8m4,8x4,16m8,16x9,32m16,32x20,64m32,64x14,128m64,128x7,256m128,256x2,512m256,1024m512"
 ffhq1024.enc_blocks = "1024x1,1024d2,512x3,512d2,256x5,256d2,128x7,128d2,64x10,64d2,32x14,32d2,16x7,16d2,8x5,8d2,4x5,4d4,1x4"
 ffhq1024.custom_width_str = "512:32,256:64,128:512,64:512,32:512,16:512,8:512,4:512,1:512"
 HPARAMS_REGISTRY['ffhq1024'] = ffhq1024
@@ -136,7 +136,7 @@ def add_vae_arguments(parser):
     parser.add_argument('--ema_rate', type=float, default=0.999)
 
     parser.add_argument('--enc_blocks', type=str, default=None)
-    parser.add_argument('--dec_blocks', type=str, default=None)
+    parser.add_argument('--architecture', type=str, default=None)
     parser.add_argument('--zdim', type=int, default=16)
     parser.add_argument('--width', type=int, default=512)
     parser.add_argument('--custom_width_str', type=str, default='')

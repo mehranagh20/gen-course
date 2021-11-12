@@ -1,3 +1,5 @@
+import imageio
+
 from hps import Hyperparams, parse_args_and_update_hparams, add_vae_arguments
 import argparse
 import os
@@ -73,3 +75,15 @@ def set_up_hyperparams(s=None):
     torch.cuda.manual_seed(H.seed)
     logprint('training model', H.desc, 'on', H.dataset)
     return H, logprint
+
+
+def generate_for_NN(model, sampler, orig, initial, shape, fname, logprint):
+    initial = initial[:shape[0]].cuda()
+    nns = sampler.sample(initial, model)
+    batches = [sampler.sample_from_out(orig), nns]
+    n_rows = len(batches)
+    im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose([0, 2, 1, 3, 4]).reshape(
+        [n_rows * shape[2], shape[0] * shape[2], 3])
+
+    logprint(f'printing samples to {fname}')
+    imageio.imwrite(fname, im)
