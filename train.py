@@ -48,7 +48,7 @@ def train(H, model, train_data, logger):
             comb_dataset = ZippedDataset(train_data, TensorDataset(sampler.selected_latents))
             data_loader = DataLoader(comb_dataset, batch_size=H.n_batch, pin_memory=True, shuffle=True)
             for ind, batch in enumerate(data_loader):
-                x = batch[0]
+                x = batch[0][0].cuda()
                 latents = batch[1][0]
                 iter_time, loss = training_step(x[0], latents, model, optimizer, sampler.calc_loss)
                 scheduler.step(cur_epoch)
