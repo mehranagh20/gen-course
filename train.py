@@ -16,7 +16,6 @@ def training_step(targets, latents, model, optimizer, loss_fn):
     t0 = time.time()
     model.zero_grad()
     px_z = model(latents)
-    print(torch.min(px_z), torch.max(px_z), torch.min(targets), torch.max(targets))
     loss = loss_fn(px_z, targets)
     loss.backward()
     optimizer.step()
