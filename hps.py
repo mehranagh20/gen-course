@@ -203,4 +203,5 @@ def add_vae_arguments(parser):
     parser.add_argument('--n_mpl', type=int, default=8)
     parser.add_argument('--image_size', type=int, default=64)
     parser.add_argument('--image_channels', type=int, default=3)
+    parser.add_argument('--devices', type=str, default='0')
     return parser

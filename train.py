@@ -68,13 +68,13 @@ def train(H, model, train_data, logger):
 def main():
     H, logger = set_up_hyperparams()
     model = Model(H).cuda()
-    model = torch.nn.DataParallel(model, device_ids=[0])
+    model = torch.nn.DataParallel(model, device_ids=[x for x in H.devices.split(',')])
     train_data = ImageFolder(H.data_root, transforms.ToTensor())
     n_split = H.n_split
     if n_split == -1:
         n_split = len(train_data)
 
-    for data_train in DataLoader(train_data, batch_size=H.n_split):
+    for data_train in DataLoader(train_data, batch_size=n_split):
         train_data = TensorDataset((data_train[0] - 0.5) * 2)
         break
 
