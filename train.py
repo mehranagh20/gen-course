@@ -39,11 +39,11 @@ def train(H, model, train_data, logger):
         sampler.calc_dists_existing(train_data, model)
         sampler.imle_sample(train_data, model, force_update=True, factor=H.force_factor)
         # save_latents_latest(H, split_ind, sampler.selected_latents)
+        generate_for_NN(H, model.module, sampler, to_vis[0], sampler.selected_latents[0: 8], to_vis[0].shape,
+                        f'{H.save_dir}/NN-samples-{iter_num}.png', logger)
+
 
         for cur_epoch in range(epoch, epoch + H.imle_staleness):
-            generate_for_NN(H, model.module, sampler, to_vis[0], sampler.selected_latents[0: 8], to_vis[0].shape,
-                            f'{H.save_dir}/NN-samples-{iter_num}.png', logger)
-
             comb_dataset = ZippedDataset(train_data, TensorDataset(sampler.selected_latents))
             data_loader = DataLoader(comb_dataset, batch_size=H.n_batch, pin_memory=True, shuffle=True)
             for ind, batch in enumerate(data_loader):
