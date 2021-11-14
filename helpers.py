@@ -100,7 +100,7 @@ def generate_images(H, model, sampler, orig, initial, shape, fname, logprint):
     temp_latent = torch.randn([shape[0], H.latent_dim], dtype=torch.float32).cuda()
     for i in range(H.num_temperatures_visualize):
         temp_latent.normal_()
-        batches.append(model(temp_latent))
+        batches.append(sampler.sample(temp_latent, model))
 
     n_rows = len(batches)
     im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose(
