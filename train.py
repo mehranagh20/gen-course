@@ -36,11 +36,11 @@ def train(H, model, train_data, logger):
     losses = []
 
     while True:
-        for cur_epoch in range(epoch, epoch + H.imle_staleness):
-            sampler.calc_dists_existing(train_data, model)
-            sampler.imle_sample(train_data, model, force_update=True, factor=H.force_factor)
-            # save_latents_latest(H, split_ind, sampler.selected_latents)
+        sampler.calc_dists_existing(train_data, model)
+        sampler.imle_sample(train_data, model, force_update=True, factor=H.force_factor)
+        # save_latents_latest(H, split_ind, sampler.selected_latents)
 
+        for cur_epoch in range(epoch, epoch + H.imle_staleness):
             generate_for_NN(model.module, sampler, to_vis[0], sampler.selected_latents[0: 8], to_vis[0].shape,
                             f'{H.save_dir}/NN-samples-{iter_num}.png', logger)
 
@@ -62,7 +62,7 @@ def train(H, model, train_data, logger):
                 if iter_num % H.iters_per_images == 0:
                     generate_images(H, model, sampler, to_vis,
                                             sampler.selected_latents[0: H.num_images_visualize],
-                                            to_vis.shape, f'{H.save_dir}/samples-{iter_num}.png', logger)
+                                            to_vis[0].shape, f'{H.save_dir}/samples-{iter_num}.png', logger)
 
 
 def main():
