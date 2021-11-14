@@ -60,7 +60,7 @@ def train(H, model, train_data, logger):
                     logger(model=H.desc, type='train_loss', latest=loss, lr=scheduler.get_last_lr()[0], epoch=cur_epoch,
                            step=iter_num, average_time=np.mean(iter_times), loss=np.mean(losses))
                 if iter_num % H.iters_per_images == 0:
-                    generate_images(H, model, sampler, to_vis,
+                    generate_images(H, model, sampler, to_vis[0],
                                             sampler.selected_latents[0: H.num_images_visualize],
                                             to_vis[0].shape, f'{H.save_dir}/samples-{iter_num}.png', logger)
 
