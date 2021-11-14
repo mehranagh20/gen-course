@@ -43,7 +43,7 @@ class Sampler:
         self.dataset_proj = torch.empty([sz, sum(dims)], dtype=torch.float32)
 
     def get_projected(self, inp):
-        out, _ = self.lpips_net(inp.cuda(device=H.devices[0]))
+        out, _ = self.lpips_net(inp.cuda(device=self.H.devices[0]))
         gen_feat = []
         for i in range(len(out)):
             gen_feat.append(torch.mm(out[i], self.projections[i]))
@@ -90,11 +90,11 @@ class Sampler:
             if ind % 1000 == 0:
                 print('finished updating dists for', ind * self.H.n_batch)
             batch_slice = slice(ind * self.H.n_batch, (ind + 1) * self.H.n_batch)
-            cur_latents = latents[batch_slice].cuda(device=H.devices[0])
+            cur_latents = latents[batch_slice].cuda(device=self.H.devices[0])
             self.dataset_proj[batch_slice] = self.get_projected(x[0])
             with torch.no_grad():
                 out = model(cur_latents)
-                dist = self.calc_loss(x[0].cuda(device=H.devices[0]), out, use_mean=False)
+                dist = self.calc_loss(x[0].cuda(device=self.H.devices[0]), out, use_mean=False)
                 dists[batch_slice] = torch.squeeze(dist)
 
     def imle_sample(self, dataset, model, force_update=False, factor=-1, update_projection=False):
