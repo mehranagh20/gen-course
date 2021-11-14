@@ -50,7 +50,7 @@ def train(H, model, train_data, logger):
                 x = batch[0][0].cuda(device=H.devices[0])
                 latents = batch[1][0]
                 iter_time, loss = training_step(x, latents, model, optimizer, sampler.calc_loss)
-                scheduler.step(cur_epoch)
+                scheduler.step()
                 iter_num = iter_num + 1
 
                 iter_times.append(iter_time)
