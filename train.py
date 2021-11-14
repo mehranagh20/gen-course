@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from torchvision.utils import save_image
 from torchvision.datasets import ImageFolder
 
-from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup
+from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images
 from model import Model
 from sampler import Sampler
 import time
@@ -59,7 +59,10 @@ def train(H, model, train_data, logger):
                 if iter_num % H.iters_per_print == 0:
                     logger(model=H.desc, type='train_loss', latest=loss, lr=scheduler.get_last_lr()[0], epoch=cur_epoch,
                            step=iter_num, average_time=np.mean(iter_times), loss=np.mean(losses))
-
+                if iter_num % H.iters_per_images == 0:
+                    generate_images(H, model, sampler, to_vis,
+                                            sampler.selected_latents[0: H.num_images_visualize],
+                                            to_vis.shape, f'{H.save_dir}/samples-{iter_num}.png', logger)
 
 
 def main():
