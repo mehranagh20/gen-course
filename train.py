@@ -68,7 +68,7 @@ def train(H, model, train_data, logger):
 def main():
     H, logger = set_up_hyperparams()
     model = Model(H).cuda()
-    model = torch.nn.DataParallel(model, device_ids=[x for x in H.devices.split(',')])
+    model = torch.nn.DataParallel(model, device_ids=[int(x) for x in H.devices.split(',')])
     train_data = ImageFolder(H.data_root, transforms.ToTensor())
     n_split = H.n_split
     if n_split == -1:
