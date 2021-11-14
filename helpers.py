@@ -76,11 +76,12 @@ def set_up_hyperparams(s=None):
     torch.manual_seed(H.seed)
     torch.cuda.manual_seed(H.seed)
     logprint('training model', H.desc, 'on', H.dataset)
+    H.devices = [int(x) for x in H.devices.split(',')]
     return H, logprint
 
 
-def generate_for_NN(model, sampler, orig, initial, shape, fname, logprint):
-    initial = initial[:shape[0]].cuda()
+def generate_for_NN(H, model, sampler, orig, initial, shape, fname, logprint):
+    initial = initial[:shape[0]].cuda(device=H.devices[0])
     nns = sampler.sample(initial, model)
     batches = [sampler.sample_from_out(orig), nns]
     n_rows = len(batches)
@@ -93,11 +94,11 @@ def generate_for_NN(model, sampler, orig, initial, shape, fname, logprint):
 
 
 def generate_images(H, model, sampler, orig, initial, shape, fname, logprint):
-    initial = initial[:shape[0]].cuda()
+    initial = initial[:shape[0]].cuda(device=H.devices[0])
     nns = sampler.sample(initial, model)
     batches = [sampler.sample_from_out(orig), nns]
 
-    temp_latent = torch.randn([shape[0], H.latent_dim], dtype=torch.float32).cuda()
+    temp_latent = torch.randn([shape[0], H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
     for i in range(H.num_temperatures_visualize):
         temp_latent.normal_()
         batches.append(sampler.sample(temp_latent, model))

@@ -11,25 +11,24 @@ from dciknn_cuda.dciknn_cuda import DCI
 
 class Sampler:
     def __init__(self, H, sz):
-        devices = [int(x) for x in H.devices.split(',')]
-        self.l2_loss = torch.nn.MSELoss(reduce=False).cuda(device=devices[0])
+        self.l2_loss = torch.nn.MSELoss(reduce=False).cuda(device=H.devices[0])
         self.H = H
         self.selected_latents = torch.empty([sz, H.latent_dim], dtype=torch.float32)
-        self.selected_dists = torch.empty([sz], dtype=torch.float32).cuda(device=devices[0])
+        self.selected_dists = torch.empty([sz], dtype=torch.float32).cuda(device=H.devices[0])
         print('yay', self.selected_dists.device)
         self.selected_latents_future = torch.empty([sz, H.latent_dim], dtype=torch.float32)
-        self.selected_dists_future = torch.empty([sz], dtype=torch.float32).cuda()
+        self.selected_dists_future = torch.empty([sz], dtype=torch.float32).cuda(device=H.devices[0])
         self.selected_dists_future[:] = np.inf
         self.selected_dists[:] = np.inf
-        self.selected_dists_tmp = torch.empty([sz], dtype=torch.float32).cuda()
+        self.selected_dists_tmp = torch.empty([sz], dtype=torch.float32).cuda(device=H.devices[0])
         self.temp_latent_rnds = torch.empty([self.H.imle_db_size, self.H.latent_dim], dtype=torch.float32)
         self.temp_samples = torch.empty([self.H.imle_db_size, H.image_channels, self.H.image_size, self.H.image_size],
                                         dtype=torch.float32)
 
         self.projections = []
-        self.lpips_net = LPNet(pnet_type=H.lpips_net).cuda()
+        self.lpips_net = LPNet(pnet_type=H.lpips_net).cuda(device=H.devices[0])
 
-        fake = torch.zeros(1, 3, H.image_size, H.image_size).cuda()
+        fake = torch.zeros(1, 3, H.image_size, H.image_size).cuda(device=H.devices[0])
         out, shapes = self.lpips_net(fake)
         dims = [int(H.proj_dim * 1. / len(out)) for _ in range(len(out))]
         if H.proj_proportion:
@@ -38,13 +37,13 @@ class Sampler:
         print(dims)
         for ind, feat in enumerate(out):
             print(feat.shape)
-            self.projections.append(F.normalize(torch.randn(feat.shape[1], dims[ind]), p=2, dim=1).cuda())
+            self.projections.append(F.normalize(torch.randn(feat.shape[1], dims[ind]), p=2, dim=1).cuda(device=H.devices[0]))
 
-        self.temp_samples_proj = torch.empty([self.H.imle_db_size, sum(dims)], dtype=torch.float32).cuda()
+        self.temp_samples_proj = torch.empty([self.H.imle_db_size, sum(dims)], dtype=torch.float32).cuda(device=H.devices[0])
         self.dataset_proj = torch.empty([sz, sum(dims)], dtype=torch.float32)
 
     def get_projected(self, inp):
-        out, _ = self.lpips_net(inp.cuda())
+        out, _ = self.lpips_net(inp.cuda(device=H.devices[0]))
         gen_feat = []
         for i in range(len(out)):
             gen_feat.append(torch.mm(out[i], self.projections[i]))
@@ -91,11 +90,11 @@ class Sampler:
             if ind % 1000 == 0:
                 print('finished updating dists for', ind * self.H.n_batch)
             batch_slice = slice(ind * self.H.n_batch, (ind + 1) * self.H.n_batch)
-            cur_latents = latents[batch_slice].cuda()
+            cur_latents = latents[batch_slice].cuda(device=H.devices[0])
             self.dataset_proj[batch_slice] = self.get_projected(x[0])
             with torch.no_grad():
                 out = model(cur_latents)
-                dist = self.calc_loss(x[0].cuda(), out, use_mean=False)
+                dist = self.calc_loss(x[0].cuda(device=H.devices[0]), out, use_mean=False)
                 dists[batch_slice] = torch.squeeze(dist)
 
     def imle_sample(self, dataset, model, force_update=False, factor=-1, update_projection=False):
@@ -119,7 +118,7 @@ class Sampler:
             self.temp_latent_rnds.normal_()
             for j in range(self.H.imle_db_size // self.H.n_batch):
                 batch_slice = slice(j * self.H.n_batch, (j + 1) * self.H.n_batch)
-                cur_latents = self.temp_latent_rnds[batch_slice].cuda()
+                cur_latents = self.temp_latent_rnds[batch_slice].cuda(device=self.H.devices[0])
                 with torch.no_grad():
                     self.temp_samples[batch_slice] = model(cur_latents)
                     # self.temp_samples[batch_slice] = torch.from_numpy(self.sample(cur_latents, model))
@@ -135,13 +134,13 @@ class Sampler:
             t0 = time.time()
             for ind, y in enumerate(DataLoader(dataset, batch_size=self.H.imle_batch)):
                 # t2 = time.time()
-                x = self.dataset_proj[ind * self.H.imle_batch:(ind + 1) * self.H.imle_batch].cuda()
-                cur_batch_data_flat = x.float().cuda()
+                x = self.dataset_proj[ind * self.H.imle_batch:(ind + 1) * self.H.imle_batch].cuda(device=self.H.devices[0])
+                cur_batch_data_flat = x.float().cuda(device=self.H.devices[0])
                 nearest_indices, _ = model.module.dci_db.query(cur_batch_data_flat, num_neighbours=1)
                 nearest_indices = nearest_indices.long()[:, 0]
 
                 batch_slice = slice(ind * self.H.imle_batch, ind * self.H.imle_batch + x.size()[0])
-                actual_selected_dists = self.calc_loss(y[0].cuda(), self.temp_samples[nearest_indices].cuda(), use_mean=False)
+                actual_selected_dists = self.calc_loss(y[0].cuda(device=self.H.devices[0]), self.temp_samples[nearest_indices].cuda(device=self.H.devices[0]), use_mean=False)
                 actual_selected_dists = torch.squeeze(actual_selected_dists)
 
                 to_update = torch.nonzero(actual_selected_dists < self.selected_dists[batch_slice], as_tuple=False)

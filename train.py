@@ -41,13 +41,13 @@ def train(H, model, train_data, logger):
         # save_latents_latest(H, split_ind, sampler.selected_latents)
 
         for cur_epoch in range(epoch, epoch + H.imle_staleness):
-            generate_for_NN(model.module, sampler, to_vis[0], sampler.selected_latents[0: 8], to_vis[0].shape,
+            generate_for_NN(H, model.module, sampler, to_vis[0], sampler.selected_latents[0: 8], to_vis[0].shape,
                             f'{H.save_dir}/NN-samples-{iter_num}.png', logger)
 
             comb_dataset = ZippedDataset(train_data, TensorDataset(sampler.selected_latents))
             data_loader = DataLoader(comb_dataset, batch_size=H.n_batch, pin_memory=True, shuffle=True)
             for ind, batch in enumerate(data_loader):
-                x = batch[0][0].cuda()
+                x = batch[0][0].cuda(device=H.devices[0])
                 latents = batch[1][0]
                 iter_time, loss = training_step(x, latents, model, optimizer, sampler.calc_loss)
                 scheduler.step(cur_epoch)
@@ -70,8 +70,8 @@ def train(H, model, train_data, logger):
 
 def main():
     H, logger = set_up_hyperparams()
-    model = Model(H).cuda()
-    model = torch.nn.DataParallel(model, device_ids=[int(x) for x in H.devices.split(',')])
+    model = Model(H).cuda(device=H.devices[0])
+    model = torch.nn.DataParallel(model, device_ids=H.devices)
     train_data = ImageFolder(H.data_root, transforms.ToTensor())
     n_split = H.n_split
     if n_split == -1:
