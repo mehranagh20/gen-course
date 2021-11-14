@@ -1,12 +1,14 @@
+import argparse
+import json
+import os
+import time
+
 import imageio
+import numpy as np
+import torch
+import torch.utils.data as data
 
 from hps import Hyperparams, parse_args_and_update_hparams, add_vae_arguments
-import argparse
-import os
-import torch
-import numpy as np
-import time
-import json
 
 
 def logger(log_prefix):
@@ -82,8 +84,48 @@ def generate_for_NN(model, sampler, orig, initial, shape, fname, logprint):
     nns = sampler.sample(initial, model)
     batches = [sampler.sample_from_out(orig), nns]
     n_rows = len(batches)
-    im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose([0, 2, 1, 3, 4]).reshape(
+    im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose(
+        [0, 2, 1, 3, 4]).reshape(
         [n_rows * shape[2], shape[0] * shape[2], 3])
 
     logprint(f'printing samples to {fname}')
     imageio.imwrite(fname, im)
+
+
+def generate_images(H, model, sampler, orig, initial, shape, fname, logprint):
+    initial = initial[:shape[0]].cuda()
+    nns = sampler.sample(initial, model)
+    batches = [sampler.sample_from_out(orig), nns]
+
+    temp_latent = torch.randn([shape[0], H.latent_dim], dtype=torch.float32).cuda()
+    for i in range(H.num_rows_visualize):
+        temp_latent.normal_()
+        batches.append(model(temp_latent))
+
+    n_rows = len(batches)
+    im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose(
+        [0, 2, 1, 3, 4]).reshape(
+        [n_rows * shape[2], shape[0] * shape[2], 3])
+
+    logprint(f'printing samples to {fname}')
+    imageio.imwrite(fname, im)
+
+
+class ZippedDataset(data.Dataset):
+
+    def __init__(self, *datasets):
+        assert all(len(datasets[0]) == len(dataset) for dataset in datasets)
+        self.datasets = datasets
+
+    def __getitem__(self, index):
+        # print(index, [len(x) for x in self.datasets])
+        return tuple(dataset[index] for dataset in self.datasets)
+
+    def __len__(self):
+        return len(self.datasets[0])
+
+
+def linear_warmup(warmup_iters):
+    def f(iteration):
+        return 1.0 if iteration > warmup_iters else iteration / warmup_iters
+    return f
