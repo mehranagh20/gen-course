@@ -15,6 +15,7 @@ import time
 def training_step(targets, latents, model, optimizer, loss_fn):
     t0 = time.time()
     model.zero_grad()
+    print(targets.shape, latents.shape)
     px_z = model(latents)
     loss = loss_fn(px_z, targets)
     loss.backward()
