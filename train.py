@@ -55,6 +55,9 @@ def train(H, model, train_data, logger):
 
                 iter_times.append(iter_time)
                 losses.append(loss)
+                if len(iter_times) > 1000:
+                    iter_times = iter_times[1:]
+                    losses = losses[1:]
 
                 if iter_num % H.iters_per_print == 0:
                     logger(model=H.desc, type='train_loss', latest=loss, lr=scheduler.get_last_lr()[0], epoch=cur_epoch,
