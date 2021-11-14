@@ -11,10 +11,11 @@ from dciknn_cuda.dciknn_cuda import DCI
 
 class Sampler:
     def __init__(self, H, sz):
-        self.l2_loss = torch.nn.MSELoss(reduce=False).cuda()
+        devices = [int(x) for x in H.devices.split(',')]
+        self.l2_loss = torch.nn.MSELoss(reduce=False).cuda(device=devices[0])
         self.H = H
         self.selected_latents = torch.empty([sz, H.latent_dim], dtype=torch.float32)
-        self.selected_dists = torch.empty([sz], dtype=torch.float32).cuda()
+        self.selected_dists = torch.empty([sz], dtype=torch.float32).cuda(device=devices[0])
         self.selected_latents_future = torch.empty([sz, H.latent_dim], dtype=torch.float32)
         self.selected_dists_future = torch.empty([sz], dtype=torch.float32).cuda()
         self.selected_dists_future[:] = np.inf
