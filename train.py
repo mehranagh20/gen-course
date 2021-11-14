@@ -15,13 +15,11 @@ import time
 def training_step(targets, latents, model, optimizer, loss_fn):
     t0 = time.time()
     model.zero_grad()
-    print(targets.shape, latents.shape)
     px_z = model(latents)
     loss = loss_fn(px_z, targets)
     loss.backward()
     optimizer.step()
     t1 = time.time()
-    print(loss, loss.item())
     return t1 - t0, loss.item()
 
 
@@ -59,7 +57,7 @@ def train(H, model, train_data, logger):
 
                 if iter_num % H.iters_per_print == 0:
                     logger(model=H.desc, type='train_loss', latest=loss, lr=scheduler.get_last_lr()[0], epoch=cur_epoch,
-                           step=iter_num, average_time=np.mean(iter_times), loss=np.mean)
+                           step=iter_num, average_time=np.mean(iter_times), loss=np.mean(losses))
 
                 iter_num = iter_num + 1
 
