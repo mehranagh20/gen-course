@@ -21,7 +21,8 @@ def training_step(targets, latents, model, optimizer, loss_fn):
     loss.backward()
     optimizer.step()
     t1 = time.time()
-    return t1 - t0, loss
+    print(loss, loss.item())
+    return t1 - t0, loss.item()
 
 
 def train(H, model, train_data, logger):
