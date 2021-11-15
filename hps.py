@@ -17,6 +17,7 @@ abstractart.width = 384
 abstractart.lr = 0.0002
 abstractart.zdim = 16
 abstractart.architecture = "1x1,4m1,4x2,8m4,8x5,16m8,16x10,32m16,32x21,32m64,64x15"
+abstractart.warmup_iters = 100
 abstractart.dataset = 'abstractart'
 abstractart.n_batch = 16
 abstractart.ema_rate = 0.9999
