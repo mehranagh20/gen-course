@@ -43,7 +43,7 @@ def train(H, model, train_data, logger):
                         f'{H.save_dir}/NN-samples-{iter_num}.png', logger)
 
 
-        for cur_epoch in range(epoch, epoch + H.imle_staleness):
+        for epoch in range(epoch, epoch + H.imle_staleness):
             comb_dataset = ZippedDataset(train_data, TensorDataset(sampler.selected_latents))
             data_loader = DataLoader(comb_dataset, batch_size=H.n_batch, pin_memory=True, shuffle=True)
             for ind, batch in enumerate(data_loader):
@@ -60,7 +60,7 @@ def train(H, model, train_data, logger):
                     losses = losses[1:]
 
                 if iter_num % H.iters_per_print == 0:
-                    logger(model=H.desc, type='train_loss', latest=loss, lr=scheduler.get_last_lr()[0], epoch=cur_epoch,
+                    logger(model=H.desc, type='train_loss', latest=loss, lr=scheduler.get_last_lr()[0], epoch=epoch,
                            step=iter_num, average_time=np.mean(iter_times), loss=np.mean(losses))
                 if iter_num % H.iters_per_images == 0:
                     generate_images(H, model, sampler, to_vis[0],
