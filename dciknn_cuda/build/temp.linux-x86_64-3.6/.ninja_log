@@ -1,4 +1,0 @@
-# ninja log v5
-1	4143	1620549406000000000	/lustre03/project/6054857/mehranag/HyperRIM/code/dciknn_cuda/build/temp.linux-x86_64-3.6/src/util_kernel.o	47371b7ed2f6ce90
-1	26769	1620549429000000000	/lustre03/project/6054857/mehranag/HyperRIM/code/dciknn_cuda/build/temp.linux-x86_64-3.6/src/dci_cuda.o	b848635b013ac3a8
-1	52693	1620549455000000000	/lustre03/project/6054857/mehranag/HyperRIM/code/dciknn_cuda/build/temp.linux-x86_64-3.6/src/dci_cuda_kernel.o	43974f627f7ecd7b
