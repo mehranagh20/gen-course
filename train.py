@@ -41,8 +41,14 @@ def train(H, model, train_data, logger):
         # save_latents_latest(H, split_ind, sampler.selected_latents)
         generate_for_NN(H, model.module, sampler, to_vis[0], sampler.selected_latents[0: 8], to_vis[0].shape,
                         f'{H.save_dir}/NN-samples-{iter_num}.png', logger)
+        if epoch == 0:
+            sampler.selected_latents.normal_()
 
 
+        # print('yo', sampler.selected_latents.shape)
+        # for i in range(10):
+        #     cur = sampler.selected_latents[i]
+        #     print('min: {}, max: {}, mean: {}, std: {}'.format(torch.min(cur), torch.max(cur), torch.mean(cur), torch.std(cur)))
         for epoch in range(epoch, epoch + H.imle_staleness):
             comb_dataset = ZippedDataset(train_data, TensorDataset(sampler.selected_latents))
             data_loader = DataLoader(comb_dataset, batch_size=H.n_batch, pin_memory=True, shuffle=True)

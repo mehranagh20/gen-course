@@ -1,1 +1,10 @@
 ./saved_models
+./env*
+res.txt
+.idea/
+cifar-10*
+saved_models
+.DS_Store
+__pycache__
+dciknn_cuda
+

@@ -115,14 +115,14 @@ class Model(nn.Module):
         first_res = self.resolutions[0]
         self.constant = nn.Parameter(torch.randn(1, self.widths[first_res], first_res, first_res))
         self.resnet = get_1x1(H.width, H.image_channels)
-        # self.gain = nn.Parameter(torch.ones(1, H.image_channels, 1, 1))
-        # self.bias = nn.Parameter(torch.zeros(1, H.image_channels, 1, 1))
+        self.gain = nn.Parameter(torch.ones(1, H.image_channels, 1, 1))
+        self.bias = nn.Parameter(torch.zeros(1, H.image_channels, 1, 1))
 
     def forward(self, latent_code):
         w = self.mapping_network(latent_code)[0]
         x = self.constant.repeat(latent_code.shape[0], 1, 1, 1)
         for idx, block in enumerate(self.architecture):
             x = block(x, w)
-        return self.resnet(x)
-        # x = self.gain * x + self.bias
-        # return x
+        x = self.resnet(x)
+        x = self.gain * x + self.bias
+        return x
