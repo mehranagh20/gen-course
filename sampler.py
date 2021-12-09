@@ -168,8 +168,8 @@ class Sampler:
                 print("NN calculated for {} - {}".format((i + 1) * self.H.imle_db_size, time.time() - t0))
 
         if force_update:
-            self.selected_dists[:] = self.selected_dists_future
-            self.selected_latents[:] = self.selected_latents_future + self.H.imle_perturb_coef * torch.randn(self.selected_latents.shape)
+            self.selected_dists[:] = self.selected_dists_future[:]
+            self.selected_latents[:] = self.selected_latents_future[:] + self.H.imle_perturb_coef * torch.randn(self.selected_latents.shape)
             self.selected_dists_future[:] = np.inf
             self.selected_latents_future.normal_()
             self.calc_dists_existing(dataset, model)
@@ -181,3 +181,16 @@ class Sampler:
                                                                                             self.selected_dists.mean(),
                                                                                             changed, (changed / len(
                 dataset)) * 100))
+
+    def second_phase(self, dataset, model, factor):
+        t1 = time.time()
+        tmp_latents = torch.zeros(factor, self.H.latent_dim).cuda()
+        tmp_samples = torch.zeros(factor, self.H.latent_dim).cuda()
+        for ind, y in enumerate(DataLoader(dataset, batch_size=1)):
+            tmp_latents.normal_()
+            tmp_latents[:self.H.latent_dim//2] = self.selected_latents[ind][:self.H.latent_dim//2]
+            dci = DCI(self.temp_samples_proj.shape[1], num_comp_indices=self.H.num_comp_indices,
+                num_simp_indices=self.H.num_simp_indices)
+            model.module.dci_db.add(self.temp_samples_proj)
+
+
