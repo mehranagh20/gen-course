@@ -186,7 +186,7 @@ def add_vae_arguments(parser):
     parser.add_argument('--latent_dim', type=int, default=512)
     parser.add_argument('--normalize_grad', type=int, default=1)
     parser.add_argument('--lpips_loss', type=int, default=1)
-    parser.add_argument('--imle_perturb_coef', type=float, default=0.001)
+    parser.add_argument('--imle_perturb_coef', type=float, default=0.1)
     parser.add_argument('--lpips_net', type=str, default='vgg')
     parser.add_argument('--num_threads', type=int, default=4)
     parser.add_argument('--subset_len', type=int, default=-1)

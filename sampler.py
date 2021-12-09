@@ -162,7 +162,7 @@ class Sampler:
 
         if force_update:
             self.selected_dists[:] = self.selected_dists_future
-            self.selected_latents[:] = self.selected_latents_future
+            self.selected_latents[:] = self.selected_latents_future + self.H.imle_perturb_coef * torch.randn(self.selected_latents.shape)
             self.selected_dists_future[:] = np.inf
             self.selected_latents_future.normal_()
             self.calc_dists_existing(dataset, model)

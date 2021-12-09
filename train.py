@@ -44,7 +44,6 @@ def train(H, model, train_data, logger):
         if epoch == 0:
             sampler.selected_latents.normal_()
 
-
         # print('yo', sampler.selected_latents.shape)
         # for i in range(10):
         #     cur = sampler.selected_latents[i]
