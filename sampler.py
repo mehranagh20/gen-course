@@ -184,13 +184,22 @@ class Sampler:
 
     def second_phase(self, dataset, model, factor):
         t1 = time.time()
-        tmp_latents = torch.zeros(factor, self.H.latent_dim).cuda()
-        tmp_samples = torch.zeros(factor, self.H.latent_dim).cuda()
+        tmp_latents = torch.zeros(factor, self.H.latent_dim)
         for ind, y in enumerate(DataLoader(dataset, batch_size=1)):
+            y = y[0]
             tmp_latents.normal_()
-            tmp_latents[:self.H.latent_dim//2] = self.selected_latents[ind][:self.H.latent_dim//2]
-            dci = DCI(self.temp_samples_proj.shape[1], num_comp_indices=self.H.num_comp_indices,
-                num_simp_indices=self.H.num_simp_indices)
-            model.module.dci_db.add(self.temp_samples_proj)
+            tmp_latents[:, :self.H.latent_dim//2] = self.selected_latents[ind, :self.H.latent_dim//2][:].reshape(1, self.H.latent_dim//2)
+            with torch.no_grad():
+                for i in range(factor // self.H.n_batch):
+                    batch_slice = slice(i * self.H.n_batch, (i + 1) * self.H.n_batch)
+                    cur_latents = tmp_latents[batch_slice].cuda(device=self.H.devices[0])
+                    self.temp_samples[batch_slice] = model(cur_latents)
 
+            flatten = self.temp_samples[:factor].reshape(factor, -1).cuda(device=self.H.devices[0])
+            dci = DCI(flatten.shape[1], num_comp_indices=self.H.num_comp_indices, num_simp_indices=self.H.num_simp_indices)
+            dci.add(flatten)
+
+            nearest_indices, _ = dci.query(y.float().cuda(device=self.H.devices[0]).reshape(1, -1), num_neighbours=1)
+            nearest_indices = nearest_indices.long()[:, 0]
+            self.selected_latents[ind][:] = tmp_latents[nearest_indices][:]
 
