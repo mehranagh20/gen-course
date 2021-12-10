@@ -1,0 +1,3 @@
+[submodule "dciknn_cuda"]
+	path = dciknn_cuda
+	url = https://github.com/niopeng/dciknn_cuda/tree/1d72ddd1c70b5865a223b1737db4cf68448cf563
