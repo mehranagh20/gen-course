@@ -146,8 +146,8 @@ class Sampler:
                 nearest_indices = nearest_indices.long()[:, 0]
 
                 batch_slice = slice(ind * self.H.imle_batch, ind * self.H.imle_batch + x.size()[0])
-                # actual_selected_dists = self.calc_loss(y[0].cuda(device=self.H.devices[0]), self.temp_samples[nearest_indices].cuda(device=self.H.devices[0]), use_mean=False, lpips_coef=1., l2_coef=0.)
-                actual_selected_dists = self.calc_loss(y[0].cuda(device=self.H.devices[0]), self.temp_samples[nearest_indices].cuda(device=self.H.devices[0]), use_mean=False)
+                actual_selected_dists = self.calc_loss(y[0].cuda(device=self.H.devices[0]), self.temp_samples[nearest_indices].cuda(device=self.H.devices[0]), use_mean=False, lpips_coef=1., l2_coef=0.)
+                #actual_selected_dists = self.calc_loss(y[0].cuda(device=self.H.devices[0]), self.temp_samples[nearest_indices].cuda(device=self.H.devices[0]), use_mean=False)
                 actual_selected_dists = torch.squeeze(actual_selected_dists)
 
                 to_update = torch.nonzero(actual_selected_dists < self.selected_dists[batch_slice], as_tuple=False)

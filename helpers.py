@@ -112,6 +112,14 @@ def generate_images(H, model, sampler, orig, initial, shape, fname, logprint):
     imageio.imwrite(fname, im)
 
 
+def save_model(path, model, optimizer, H):
+    torch.save(model.state_dict(), f'{path}-model.th')
+    torch.save(optimizer.state_dict(), f'{path}-opt.th')
+    # from_log = os.path.join(H.save_dir, 'log.jsonl')
+    # to_log = f'{os.path.dirname(path)}/{os.path.basename(path)}-log.jsonl'
+    # subprocess.check_output(['cp', from_log, to_log])
+
+
 class ZippedDataset(data.Dataset):
 
     def __init__(self, *datasets):

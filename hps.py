@@ -122,6 +122,7 @@ def add_vae_arguments(parser):
     parser.add_argument('--port', type=int, default=29500)
     parser.add_argument('--save_dir', type=str, default='./saved_models')
     parser.add_argument('--data_root', type=str, default='./')
+    parser.add_argument('--data_root2', type=str, default='./')
 
     parser.add_argument('--desc', type=str, default='test')
     parser.add_argument('--hparam_sets', '--hps', type=str)
