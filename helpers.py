@@ -111,6 +111,83 @@ def generate_images(H, model, sampler, orig, initial, shape, fname, logprint):
     logprint(f'printing samples to {fname}')
     imageio.imwrite(fname, im)
 
+def unconditional_images_fix_first(H, model, sampler, shape, fname, logprint):
+    batches = []
+    temp_latent = torch.randn([shape[0], H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
+    for i in range(H.num_temperatures_visualize):
+        temp_latent.normal_()
+        temp_latent[:, :H.latent_dim//2] = temp_latent[1, :H.latent_dim//2]
+        batches.append(sampler.sample(temp_latent, model))
+
+    n_rows = len(batches)
+    im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose(
+        [0, 2, 1, 3, 4]).reshape(
+        [n_rows * shape[2], shape[0] * shape[2], 3])
+
+    logprint(f'printing samples to {fname}')
+    imageio.imwrite(fname, im)
+
+def unconditional_images_fix_second(H, model, sampler, shape, fname, logprint):
+    batches = []
+    temp_latent = torch.randn([shape[0], H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
+    for i in range(H.num_temperatures_visualize):
+        temp_latent.normal_()
+        temp_latent[:, H.latent_dim//2:] = temp_latent[1, H.latent_dim//2:]
+        batches.append(sampler.sample(temp_latent, model))
+
+    n_rows = len(batches)
+    im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose(
+        [0, 2, 1, 3, 4]).reshape(
+        [n_rows * shape[2], shape[0] * shape[2], 3])
+
+    logprint(f'printing samples to {fname}')
+    imageio.imwrite(fname, im)
+
+def unconditional_images_zero_second(H, model, sampler, shape, fname, logprint):
+    batches = []
+    temp_latent = torch.randn([shape[0], H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
+    for i in range(H.num_temperatures_visualize):
+        temp_latent.normal_()
+        temp_latent[:, H.latent_dim//2:] = min(1, i/10)
+        batches.append(sampler.sample(temp_latent, model))
+
+    n_rows = len(batches)
+    im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose(
+        [0, 2, 1, 3, 4]).reshape(
+        [n_rows * shape[2], shape[0] * shape[2], 3])
+
+    logprint(f'printing samples to {fname}')
+    imageio.imwrite(fname, im)
+
+def unconditional_images_zero_first(H, model, sampler, shape, fname, logprint):
+    batches = []
+    temp_latent = torch.randn([shape[0], H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
+    for i in range(H.num_temperatures_visualize):
+        temp_latent.normal_()
+        temp_latent[:, :H.latent_dim//2] = min(1, i/10)
+        batches.append(sampler.sample(temp_latent, model))
+
+    n_rows = len(batches)
+    im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose(
+        [0, 2, 1, 3, 4]).reshape(
+        [n_rows * shape[2], shape[0] * shape[2], 3])
+
+    logprint(f'printing samples to {fname}')
+    imageio.imwrite(fname, im)
+
+def restore_params(model, path, map_ddp=True, map_cpu=False):
+    state_dict = torch.load(path, map_location='cpu' if map_cpu else None)
+    if map_ddp:
+        new_state_dict = {}
+        l = len('module.')
+        for k in state_dict:
+            if k.startswith('module.'):
+                new_state_dict[k[l:]] = state_dict[k]
+            else:
+                new_state_dict[k] = state_dict[k]
+        state_dict = new_state_dict
+    model.load_state_dict(state_dict)
+
 
 def save_model(path, model, optimizer, H):
     torch.save(model.state_dict(), f'{path}-model.th')

@@ -94,7 +94,7 @@ class Sampler:
         for ind, x in enumerate(DataLoader(dataset, batch_size=self.H.n_batch)):
             if ind % 1000 == 0:
                 print('finished updating dists for', ind * self.H.n_batch)
-            batch_slice = slice(ind * self.H.n_batch, (ind + 1) * self.H.n_batch)
+            batch_slice = slice(ind * self.H.n_batch, ind * self.H.n_batch + x[0].shape[0])
             cur_latents = latents[batch_slice].cuda(device=self.H.devices[0])
             self.dataset_proj[batch_slice] = self.get_projected(x[0])
             with torch.no_grad():
@@ -140,7 +140,7 @@ class Sampler:
             t0 = time.time()
             for ind, y in enumerate(DataLoader(dataset, batch_size=self.H.imle_batch)):
                 # t2 = time.time()
-                x = self.dataset_proj[ind * self.H.imle_batch:(ind + 1) * self.H.imle_batch].cuda(device=self.H.devices[0])
+                x = self.dataset_proj[ind * self.H.imle_batch:ind * self.H.imle_batch + y[0].shape[0]].cuda(device=self.H.devices[0])
                 cur_batch_data_flat = x.float().cuda(device=self.H.devices[0])
                 nearest_indices, _ = model.module.dci_db.query(cur_batch_data_flat, num_neighbours=1)
                 nearest_indices = nearest_indices.long()[:, 0]

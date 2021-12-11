@@ -8,7 +8,7 @@ from torchvision.utils import save_image
 from torchvision.datasets import ImageFolder
 from torch.utils.data import ConcatDataset
 
-from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images, save_model
+from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images, save_model, restore_params, unconditional_images_fix_first, unconditional_images_fix_second, unconditional_images_zero_second, unconditional_images_zero_first
 from model import Model
 from sampler import Sampler
 import time
@@ -25,9 +25,8 @@ def training_step(targets, latents, model, optimizer, loss_fn):
     return t1 - t0, loss.item()
 
 
-def train(H, model, train_data, logger):
+def train(H, model, train_data, logger, sampler):
     epoch, iter_num = 0, 0
-    sampler = Sampler(H, H.n_split)
     for to_vis in DataLoader(train_data, batch_size=8):
         break
 
@@ -87,7 +86,6 @@ def train(H, model, train_data, logger):
 def main():
     H, logger = set_up_hyperparams()
     model = Model(H).cuda(device=H.devices[0])
-    model = torch.nn.DataParallel(model, device_ids=H.devices)
     train_data1 = ImageFolder(H.data_root, transforms.ToTensor())
     train_data2 = ImageFolder(H.data_root2, transforms.ToTensor())
     train_data = None
@@ -105,7 +103,23 @@ def main():
         train_data = TensorDataset(train_data[0])
         break
 
-    train(H, model, train_data, logger)
+    sampler = Sampler(H, H.n_split)
+
+    if H.test_eval:
+        restore_params(model, H.restore_path, map_cpu=True)
+        for to_vis in DataLoader(train_data, batch_size=12):
+            break
+        model = torch.nn.DataParallel(model, device_ids=H.devices)
+
+        unconditional_images_fix_first(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/first-{H.fname}', logger)
+        unconditional_images_fix_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/second-{H.fname}', logger)
+        unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-secodn-{H.fname}', logger)
+        unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-first-{H.fname}', logger)
+
+    else:
+        model = torch.nn.DataParallel(model, device_ids=H.devices)
+        train(H, model, train_data, logger)
+
 
 
 if __name__ == "__main__":
