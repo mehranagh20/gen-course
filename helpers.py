@@ -189,9 +189,10 @@ def restore_params(model, path, map_ddp=True, map_cpu=False):
     model.load_state_dict(state_dict)
 
 
-def save_model(path, model, optimizer, H):
+def save_model(path, model, latents, optimizer, H):
     torch.save(model.state_dict(), f'{path}-model.th')
     torch.save(optimizer.state_dict(), f'{path}-opt.th')
+    torch.save(latents, f'{path}-latents.th')
     # from_log = os.path.join(H.save_dir, 'log.jsonl')
     # to_log = f'{os.path.dirname(path)}/{os.path.basename(path)}-log.jsonl'
     # subprocess.check_output(['cp', from_log, to_log])

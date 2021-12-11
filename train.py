@@ -39,7 +39,7 @@ def train(H, model, train_data, logger, sampler):
     while True:
         sampler.calc_dists_existing(train_data, model)
         sampler.first_phase(train_data, model, force_update=True, factor=H.force_factor)
-        sampler.second_phase(train_data, model, 64)
+        sampler.second_phase(train_data, model, 2)
         # save_latents_latest(H, split_ind, sampler.selected_latents)
         generate_for_NN(H, model.module, sampler, to_vis[0], sampler.selected_latents[0: 8], to_vis[0].shape,
                         f'{H.save_dir}/NN-samples-{iter_num}.png', logger)
@@ -51,6 +51,7 @@ def train(H, model, train_data, logger, sampler):
         #     cur = sampler.selected_latents[i]
         #     print('min: {}, max: {}, mean: {}, std: {}'.format(torch.min(cur), torch.max(cur), torch.mean(cur), torch.std(cur)))
         for epoch in range(epoch, epoch + H.imle_staleness):
+            print(len(train_data), len(TensorDataset(sampler.selected_latents)))
             comb_dataset = ZippedDataset(train_data, TensorDataset(sampler.selected_latents))
             data_loader = DataLoader(comb_dataset, batch_size=H.n_batch, pin_memory=True, shuffle=True)
             for ind, batch in enumerate(data_loader):
@@ -77,10 +78,10 @@ def train(H, model, train_data, logger, sampler):
                 if iter_num % H.iters_per_save == 0:
                     fp = os.path.join(H.save_dir, 'latest')
                     logger(f'Saving model@ {iter_num} to {fp}')
-                    save_model(fp, model, optimizer, H)
+                    save_model(fp, model, sampler.selected_latents, optimizer, H)
 
                 if iter_num % H.iters_per_ckpt == 0:
-                    save_model(os.path.join(H.save_dir, f'iter-{iter_num}'), model, optimizer, H)
+                    save_model(os.path.join(H.save_dir, f'iter-{iter_num}'), model, sampler.selected_latents, optimizer, H)
 
 
 def main():
@@ -93,7 +94,6 @@ def main():
     n_split = H.n_split
     if n_split == -1:
         n_split = len(train_data)
-
     for first in DataLoader(train_data1, batch_size=n_split//2):
         break
     for second in DataLoader(train_data2, batch_size=n_split//2):
@@ -118,7 +118,7 @@ def main():
 
     else:
         model = torch.nn.DataParallel(model, device_ids=H.devices)
-        train(H, model, train_data, logger)
+        train(H, model, train_data, logger, sampler)
 
 
 
