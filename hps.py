@@ -205,4 +205,6 @@ def add_vae_arguments(parser):
     parser.add_argument('--image_channels', type=int, default=3)
     parser.add_argument('--devices', type=str, default='0')
     parser.add_argument('--fname', type=str, default='testing.png')
+
+    parser.add_argument('--save-train', action='store_true', help='Save the train dataset in a folder called train_set')
     return parser
