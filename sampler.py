@@ -186,7 +186,7 @@ class Sampler:
         t1 = time.time()
         tmp_latents = torch.zeros(factor, self.H.latent_dim)
         for ind, y in enumerate(DataLoader(dataset, batch_size=1)):
-            y = y[0]
+            y = y[0].float().cuda()
             tmp_latents.normal_()
             tmp_latents[:, :self.H.latent_dim//2] = self.selected_latents[ind, :self.H.latent_dim//2][:].reshape(1, self.H.latent_dim//2)
             with torch.no_grad():
@@ -199,7 +199,7 @@ class Sampler:
             dci = DCI(flatten.shape[1], num_comp_indices=self.H.num_comp_indices, num_simp_indices=self.H.num_simp_indices)
             dci.add(flatten)
 
-            nearest_indices, _ = dci.query(y.float().cuda(device=self.H.devices[0]).reshape(1, -1), num_neighbours=1)
+            nearest_indices, _ = dci.query(y.reshape(1, -1), num_neighbours=1)
             nearest_indices = nearest_indices.long()[:, 0]
             self.selected_latents[ind][:] = tmp_latents[nearest_indices][:]
 
