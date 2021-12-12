@@ -194,7 +194,7 @@ class Sampler:
                 for i in range(factor // self.H.n_batch):
                     batch_slice = slice(i * self.H.n_batch, (i + 1) * self.H.n_batch)
                     cur_latents = tmp_latents[batch_slice].cuda(device=self.H.devices[0])
-                    tmp_samples[batch_slice] = model(cur_latents)
+                    tmp_samples[i * self.H.n_batch:i * self.H.n_batch + cur_latents.shape[0]] = model(cur_latents)[:]
 
             flatten = tmp_samples.reshape(factor, -1)
             dci = DCI(flatten.shape[1], num_comp_indices=self.H.num_comp_indices, num_simp_indices=self.H.num_simp_indices)
