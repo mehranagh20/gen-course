@@ -39,7 +39,7 @@ def train(H, model, train_data, logger, sampler):
     while True:
         sampler.calc_dists_existing(train_data, model)
         sampler.first_phase(train_data, model, force_update=True, factor=H.force_factor)
-        sampler.second_phase(train_data, model, 2)
+        # sampler.second_phase(train_data, model, 2)
         # save_latents_latest(H, split_ind, sampler.selected_latents)
         generate_for_NN(H, model.module, sampler, to_vis[0], sampler.selected_latents[0: 8], to_vis[0].shape,
                         f'{H.save_dir}/NN-samples-{iter_num}.png', logger)

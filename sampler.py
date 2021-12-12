@@ -121,7 +121,7 @@ class Sampler:
         self.selected_dists_tmp[:] = self.selected_dists[:]
         for i in range(imle_pool_size // self.H.imle_db_size):
             self.temp_latent_rnds.normal_()
-            self.temp_latent_rnds[:, self.H.latent_dim//2:].zero_()
+            # self.temp_latent_rnds[:, self.H.latent_dim//2:].zero_()
             for j in range(self.H.imle_db_size // self.H.n_batch):
                 batch_slice = slice(j * self.H.n_batch, (j + 1) * self.H.n_batch)
                 cur_latents = self.temp_latent_rnds[batch_slice].cuda(device=self.H.devices[0])
@@ -146,7 +146,7 @@ class Sampler:
                 nearest_indices = nearest_indices.long()[:, 0]
 
                 batch_slice = slice(ind * self.H.imle_batch, ind * self.H.imle_batch + x.size()[0])
-                actual_selected_dists = self.calc_loss(y[0].cuda(device=self.H.devices[0]), self.temp_samples[nearest_indices].cuda(device=self.H.devices[0]), use_mean=False, lpips_coef=1., l2_coef=0.)
+                actual_selected_dists = self.calc_loss(y[0].cuda(device=self.H.devices[0]), self.temp_samples[nearest_indices].cuda(device=self.H.devices[0]), use_mean=False)
                 #actual_selected_dists = self.calc_loss(y[0].cuda(device=self.H.devices[0]), self.temp_samples[nearest_indices].cuda(device=self.H.devices[0]), use_mean=False)
                 actual_selected_dists = torch.squeeze(actual_selected_dists)
 
@@ -169,7 +169,7 @@ class Sampler:
 
         if force_update:
             self.selected_dists[:] = self.selected_dists_future[:]
-            self.selected_latents[:] = self.selected_latents_future[:] + self.H.imle_perturb_coef * torch.randn(self.selected_latents.shape)
+            self.selected_latents[:] = self.selected_latents_future[:]
             self.selected_dists_future[:] = np.inf
             self.selected_latents_future.normal_()
             self.calc_dists_existing(dataset, model)
