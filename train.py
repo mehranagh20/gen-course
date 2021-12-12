@@ -44,7 +44,11 @@ def train(H, model, train_data, logger, sampler):
         generate_for_NN(H, model.module, sampler, to_vis[0], sampler.selected_latents[0: 8], to_vis[0].shape,
                         f'{H.save_dir}/NN-samples-{iter_num}.png', logger)
         if epoch == 0:
-            sampler.selected_latents.normal_()
+            if H.restore_latent_path:
+                print('restoring latent codes')
+                sampler.selected_latents[:] = torch.load(H.restore_latent_path)[:]
+            else:
+                sampler.selected_latents.normal_()
 
         # print('yo', sampler.selected_latents.shape)
         # for i in range(10):
@@ -104,8 +108,8 @@ def main():
 
     sampler = Sampler(H, H.n_split)
 
+    restore_params(model, H.restore_path, map_cpu=True)
     if H.test_eval:
-        restore_params(model, H.restore_path, map_cpu=True)
         for to_vis in DataLoader(train_data, batch_size=12):
             break
         model = torch.nn.DataParallel(model, device_ids=H.devices)

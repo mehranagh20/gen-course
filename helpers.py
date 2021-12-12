@@ -176,6 +176,9 @@ def unconditional_images_zero_first(H, model, sampler, shape, fname, logprint):
     imageio.imwrite(fname, im)
 
 def restore_params(model, path, map_ddp=True, map_cpu=False):
+    if not path:
+        return
+    print('restoring the model')
     state_dict = torch.load(path, map_location='cpu' if map_cpu else None)
     if map_ddp:
         new_state_dict = {}
