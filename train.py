@@ -39,6 +39,13 @@ def train(H, model, train_data, logger, sampler):
     losses = []
 
     while True:
+        if epoch == starting_epoch:
+            if H.restore_latent_path:
+                print('restoring latent codes')
+                sampler.selected_latents[:] = torch.load(H.restore_latent_path)[:]
+            elif epoch == 0:
+                print('random latents')
+                sampler.selected_latents.normal_()
         sampler.calc_dists_existing(train_data, model)
         sampler.first_phase(train_data, model, force_update=True, factor=H.force_factor)
         sampler.second_phase(train_data, model, 2)
