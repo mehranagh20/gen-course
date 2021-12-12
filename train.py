@@ -8,7 +8,7 @@ from torchvision.utils import save_image
 from torchvision.datasets import ImageFolder
 from torch.utils.data import ConcatDataset
 
-from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images, save_model, restore_params, unconditional_images_fix_first, unconditional_images_fix_second, unconditional_images_zero_second, unconditional_images_zero_first
+from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images, save_model, restore_params, unconditional_images_fix_first, unconditional_images_fix_second, unconditional_images_zero_second, unconditional_images_zero_first, restore_log
 from model import Model
 from sampler import Sampler
 import time
@@ -26,7 +26,9 @@ def training_step(targets, latents, model, optimizer, loss_fn):
 
 
 def train(H, model, train_data, logger, sampler):
-    epoch, iter_num = 0, 0
+    epoch, iter_num = restore_log(H.restore_log_path)
+    print('epoch: {}, iter_num: {}'.format(epoch, iter_num))
+    starting_epoch = epoch
     for to_vis in DataLoader(train_data, batch_size=8):
         break
 
@@ -43,11 +45,12 @@ def train(H, model, train_data, logger, sampler):
         # save_latents_latest(H, split_ind, sampler.selected_latents)
         generate_for_NN(H, model.module, sampler, to_vis[0], sampler.selected_latents[0: 8], to_vis[0].shape,
                         f'{H.save_dir}/NN-samples-{iter_num}.png', logger)
-        if epoch == 0:
+        if epoch == starting_epoch:
             if H.restore_latent_path:
                 print('restoring latent codes')
                 sampler.selected_latents[:] = torch.load(H.restore_latent_path)[:]
-            else:
+            elif epoch == 0:
+                print('random latents')
                 sampler.selected_latents.normal_()
 
         # print('yo', sampler.selected_latents.shape)
