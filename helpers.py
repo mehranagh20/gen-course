@@ -220,11 +220,10 @@ def linear_warmup(warmup_iters):
         return 1.0 if iteration > warmup_iters else iteration / warmup_iters
     return f
 
-
 def restore_log(path):
     if not path:
         return 0, 0
     loaded = [json.loads(l) for l in open(path)]
-    starting_epoch = max([z['epoch'] for z in loaded])
-    iterate = max([z['step'] for z in loaded])
+    starting_epoch = max([z['epoch'] for z in loaded if 'type' in z and z['type'] == 'train_loss'])
+    iterate = max([z['step'] for z in loaded if 'type' in z and z['type'] == 'train_loss'])
     return iterate, starting_epoch
