@@ -51,7 +51,6 @@ def train(H, model, train_data, logger, sampler):
         #     cur = sampler.selected_latents[i]
         #     print('min: {}, max: {}, mean: {}, std: {}'.format(torch.min(cur), torch.max(cur), torch.mean(cur), torch.std(cur)))
         for epoch in range(epoch, epoch + H.imle_staleness):
-            print(len(train_data), len(TensorDataset(sampler.selected_latents)))
             comb_dataset = ZippedDataset(train_data, TensorDataset(sampler.selected_latents))
             data_loader = DataLoader(comb_dataset, batch_size=H.n_batch, pin_memory=True, shuffle=True)
             for ind, batch in enumerate(data_loader):
