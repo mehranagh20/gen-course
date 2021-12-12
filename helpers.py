@@ -226,4 +226,4 @@ def restore_log(path):
     loaded = [json.loads(l) for l in open(path)]
     starting_epoch = max([z['epoch'] for z in loaded if 'type' in z and z['type'] == 'train_loss'])
     iterate = max([z['step'] for z in loaded if 'type' in z and z['type'] == 'train_loss'])
-    return iterate, starting_epoch
+    return starting_epoch, iterate
