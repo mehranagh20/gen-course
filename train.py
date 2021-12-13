@@ -12,6 +12,7 @@ from torchvision.datasets import ImageFolder
 from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images, save_model, \
     restore_params, unconditional_images_fix_first, unconditional_images_fix_second, unconditional_images_zero_second, \
     restore_log, make_gif, make_gif_nei, unconditional_images_zero_first, unconditional_images_zero_first_gif
+from helpers import generate_combine_latents
 from model import Model
 from sampler import Sampler
 
@@ -153,6 +154,7 @@ def main():
                                          logger)
         unconditional_images_zero_first(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-first-{H.fname}',
                                          logger)
+        generate_combine_latents(H, model, sampler, to_vis[0].shape, f"{H.save_dir}/combine-latents-{H.fname}", logger)
     else:
         model = torch.nn.DataParallel(model, device_ids=H.devices)
         train(H, model, train_data, logger, sampler)
