@@ -11,7 +11,7 @@ from torchvision.datasets import ImageFolder
 
 from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images, save_model, \
     restore_params, unconditional_images_fix_first, unconditional_images_fix_second, unconditional_images_zero_second, \
-    restore_log, make_gif, make_gif_nei, unconditional_images_zero_first
+    restore_log, make_gif, make_gif_nei, unconditional_images_zero_first, unconditional_images_zero_first_gif
 from model import Model
 from sampler import Sampler
 
@@ -123,6 +123,8 @@ def main():
         make_gif(H, model, sampler, f'{H.save_dir}/gif.mp4', logger)
         make_gif(H, model, sampler, f'{H.save_dir}/gif2.mp4', logger)
         make_gif(H, model, sampler, f'{H.save_dir}/gif3.mp4', logger)
+        unconditional_images_zero_first_gif(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/gif-zero-first-{H.fname}',
+                                        logger)
         if H.restore_latent_path:
             for to_vis in DataLoader(train_data, batch_size=8):
                 break
