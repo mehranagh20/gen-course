@@ -125,6 +125,7 @@ def main():
         # make_gif(H, model, sampler, f'{H.save_dir}/gif3.mp4', logger)
         if H.resotre_latent_path:
             latents = torch.load(H.restore_latent_path)
+            print('yes')
             make_gif_nei(H, model, sampler, to_vis[0],
                             latents[0: H.num_images_visualize], f'{H.save_dir}/nei.mp4', logger)
         unconditional_images_fix_first(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/first-{H.fname}', logger)

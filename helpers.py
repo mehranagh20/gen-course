@@ -242,7 +242,7 @@ def make_gif(H, model, sampler, fname, logprint):
     imageio.mimwrite(fname, result, fps=30)
 
 
-def make_gif_nei(H, model, sampler, orig, initial, shape, fname, logprint):
+def make_gif_nei(H, model, sampler, orig, initial, fname, logprint):
     result = []
     shape = orig.shape
     lat = torch.randn([orig.shape[0], H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
