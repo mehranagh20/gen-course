@@ -273,14 +273,11 @@ def unconditional_images_zero_first_gif(H, model, sampler, shape, fname, logprin
     lat1[:, :H.latent_dim // 2] = 0
     lat2[:, :H.latent_dim // 2] = 1
     lat1[:, H.latent_dim // 2:] = lat2[:, H.latent_dim // 2:][:]
-
     for i in range(num):
         batches = []
         for i in range(H.num_temperatures_visualize):
-            temp_latent.normal_()
-            temp_latent[:, :H.latent_dim//2] = min(1, i/i)
-            batches.append(sampler.sample(temp_latent, model))
-
+            lat1 = torch.lerp(lat1, lat2, 1 / num)
+            batches.append(sampler.sample(lat1, model))
         n_rows = len(batches)
         im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose(
             [0, 2, 1, 3, 4]).reshape(
@@ -288,4 +285,4 @@ def unconditional_images_zero_first_gif(H, model, sampler, shape, fname, logprin
         results.append(im)
 
     logprint(f'printing samples to {fname}')
-    imageio.imwrite(fname, im)
+    imageio.mimwrite(fname, results, fps=30)
