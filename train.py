@@ -123,7 +123,7 @@ def main():
         # make_gif(H, model, sampler, f'{H.save_dir}/gif.mp4', logger)
         # make_gif(H, model, sampler, f'{H.save_dir}/gif2.mp4', logger)
         # make_gif(H, model, sampler, f'{H.save_dir}/gif3.mp4', logger)
-        if H.resotre_latent_path:
+        if H.restore_latent_path:
             latents = torch.load(H.restore_latent_path)
             print('yes')
             make_gif_nei(H, model, sampler, to_vis[0],
