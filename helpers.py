@@ -285,4 +285,4 @@ def unconditional_images_zero_first_gif(H, model, sampler, shape, fname, logprin
         results.append(im)
 
     logprint(f'printing samples to {fname}')
-    imageio.mimwrite(fname, results, fps=20)
+    imageio.mimwrite(fname, results, fps=60)
