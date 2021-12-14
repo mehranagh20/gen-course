@@ -252,9 +252,9 @@ def make_gif_nei(H, model, sampler, orig, initial, fname, logprint):
     batches = [sampler.sample_from_out(orig), nns]
     num = 200
     for i in range(num):
-        lat = torch.lerp(lat, initial, 1/num)
+        lat2 = torch.lerp(lat, initial, i/num)
         # temp_latent[:, :H.latent_dim//2] = min(1, i/10)
-        batches.append(sampler.sample(lat, model).squeeze())
+        batches.append(sampler.sample(lat2, model).squeeze())
 
         im = np.concatenate(batches, axis=0).reshape((3, shape[0], shape[2], shape[2], 3)).transpose(
             [0, 2, 1, 3, 4]).reshape(
