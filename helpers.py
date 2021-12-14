@@ -236,4 +236,5 @@ def make_gif(H, model, sampler, fname, logprint):
         temp_latent.normal_()
         # temp_latent[:, :H.latent_dim//2] = min(1, i/10)
         result.append(sampler.sample(temp_latent, model))
+    logprint(f'printing gif to {fname}')
     imageio.mimwrite(fname, result, fps=30)

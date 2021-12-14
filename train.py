@@ -1,17 +1,19 @@
-import numpy as np
 import os
+import time
+
+import numpy as np
 import torch
 import torchvision.transforms as transforms
 from torch.optim import AdamW
-from torch.utils.data import DataLoader, TensorDataset
-from torchvision.utils import save_image
-from torchvision.datasets import ImageFolder
 from torch.utils.data import ConcatDataset
+from torch.utils.data import DataLoader, TensorDataset
+from torchvision.datasets import ImageFolder
 
-from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images, save_model, restore_params, unconditional_images_fix_first, unconditional_images_fix_second, unconditional_images_zero_second, unconditional_images_zero_first, restore_log
+from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images, save_model, \
+    restore_params, unconditional_images_fix_first, unconditional_images_fix_second, unconditional_images_zero_second, \
+    restore_log, make_gif
 from model import Model
 from sampler import Sampler
-import time
 
 
 def training_step(targets, latents, model, optimizer, loss_fn):
@@ -78,16 +80,17 @@ def train(H, model, train_data, logger, sampler):
                            step=iter_num, average_time=np.mean(iter_times), loss=np.mean(losses))
                 if iter_num % H.iters_per_images == 0:
                     generate_images(H, model, sampler, to_vis[0],
-                                            sampler.selected_latents[0: H.num_images_visualize],
-                                            to_vis[0].shape, f'{H.save_dir}/samples-{iter_num}.png', logger)
-                
+                                    sampler.selected_latents[0: H.num_images_visualize],
+                                    to_vis[0].shape, f'{H.save_dir}/samples-{iter_num}.png', logger)
+
                 if iter_num % H.iters_per_save == 0:
                     fp = os.path.join(H.save_dir, 'latest')
                     logger(f'Saving model@ {iter_num} to {fp}')
                     save_model(fp, model, sampler.selected_latents, optimizer, H)
 
                 if iter_num % H.iters_per_ckpt == 0:
-                    save_model(os.path.join(H.save_dir, f'iter-{iter_num}'), model, sampler.selected_latents, optimizer, H)
+                    save_model(os.path.join(H.save_dir, f'iter-{iter_num}'), model, sampler.selected_latents, optimizer,
+                               H)
 
 
 def main():
@@ -100,9 +103,9 @@ def main():
     n_split = H.n_split
     if n_split == -1:
         n_split = len(train_data)
-    for first in DataLoader(train_data1, batch_size=n_split//2):
+    for first in DataLoader(train_data1, batch_size=n_split // 2):
         break
-    for second in DataLoader(train_data2, batch_size=n_split//2):
+    for second in DataLoader(train_data2, batch_size=n_split // 2):
         break
     train_data = ConcatDataset([TensorDataset((first[0] - 0.5) * 2), TensorDataset((second[0] - 0.5) * 2)])
     for train_data in DataLoader(train_data, batch_size=len(train_data), shuffle=True):
@@ -117,15 +120,17 @@ def main():
             break
         model = torch.nn.DataParallel(model, device_ids=H.devices)
 
+        make_gif(H, model, sampler, f'{H.save_dir}/gif-{H.fname}', logger)
         unconditional_images_fix_first(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/first-{H.fname}', logger)
         unconditional_images_fix_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/second-{H.fname}', logger)
-        unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-secodn-{H.fname}', logger)
-        unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-first-{H.fname}', logger)
+        unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-secodn-{H.fname}',
+                                         logger)
+        unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-first-{H.fname}',
+                                         logger)
 
     else:
         model = torch.nn.DataParallel(model, device_ids=H.devices)
         train(H, model, train_data, logger, sampler)
-
 
 
 if __name__ == "__main__":
