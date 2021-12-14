@@ -235,7 +235,6 @@ def make_gif(H, model, sampler, fname, logprint):
     for i in range(H.num_temperatures_visualize):
         temp_latent.normal_()
         # temp_latent[:, :H.latent_dim//2] = min(1, i/10)
-        result.append(sampler.sample(temp_latent, model))
-        print(result[-1].squeeze().shape)
+        result.append(sampler.sample(temp_latent, model).squeeze())
     logprint(f'printing gif to {fname}')
     imageio.mimwrite(fname, result, fps=30)
