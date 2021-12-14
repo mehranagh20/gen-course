@@ -121,6 +121,8 @@ def main():
         model = torch.nn.DataParallel(model, device_ids=H.devices)
 
         make_gif(H, model, sampler, f'{H.save_dir}/gif.mp4', logger)
+        make_gif(H, model, sampler, f'{H.save_dir}/gif2.mp4', logger)
+        make_gif(H, model, sampler, f'{H.save_dir}/gif3.mp4', logger)
         unconditional_images_fix_first(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/first-{H.fname}', logger)
         unconditional_images_fix_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/second-{H.fname}', logger)
         unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-secodn-{H.fname}',
