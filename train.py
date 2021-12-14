@@ -11,7 +11,7 @@ from torchvision.datasets import ImageFolder
 
 from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images, save_model, \
     restore_params, unconditional_images_fix_first, unconditional_images_fix_second, unconditional_images_zero_second, \
-    restore_log, make_gif, make_gif_nei
+    restore_log, make_gif, make_gif_nei, unconditional_images_zero_first
 from model import Model
 from sampler import Sampler
 
@@ -131,9 +131,9 @@ def main():
                             latents[0: to_vis[0].shape[0]].cuda(), f'{H.save_dir}/nei.mp4', logger)
         unconditional_images_fix_first(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/first-{H.fname}', logger)
         unconditional_images_fix_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/second-{H.fname}', logger)
-        unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-secodn-{H.fname}',
+        unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-second-{H.fname}',
                                          logger)
-        unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-first-{H.fname}',
+        unconditional_images_zero_first(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-first-{H.fname}',
                                          logger)
 
     else:
