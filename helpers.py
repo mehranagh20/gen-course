@@ -230,11 +230,17 @@ def restore_log(path):
 
 
 def make_gif(H, model, sampler, fname, logprint):
-    result = []
+    # result = []
     temp_latent = torch.randn([1, H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
+    # for i in range(H.num_temperatures_visualize):
+    #     temp_latent.normal_()
+    #     # temp_latent[:, :H.latent_dim//2] = min(1, i/10)
+    #     result.append(sampler.sample(temp_latent, model).squeeze())
+    # logprint(f'printing gif to {fname}')
+    # imageio.mimwrite(fname, result, fps=30)
+    writer = imageio.get_writer('test.mp4', fps=20)
     for i in range(H.num_temperatures_visualize):
         temp_latent.normal_()
         # temp_latent[:, :H.latent_dim//2] = min(1, i/10)
-        result.append(sampler.sample(temp_latent, model).squeeze())
-    logprint(f'printing gif to {fname}')
-    imageio.mimwrite(fname, result, fps=30)
+        writer.append_data(sampler.sample(temp_latent, model).squeeze())
+    writer.close()
