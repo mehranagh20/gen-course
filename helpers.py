@@ -252,9 +252,9 @@ def make_gif_nei(H, model, sampler, orig, initial, fname, logprint):
     batches = [sampler.sample_from_out(orig), nns]
     num = 200
     for i in range(num):
-        initial = torch.lerp(initial, lat, 1/num)
+        lat = torch.lerp(lat, initial, 1/num)
         # temp_latent[:, :H.latent_dim//2] = min(1, i/10)
-        batches.append(sampler.sample(initial, model).squeeze())
+        batches.append(sampler.sample(lat, model).squeeze())
 
         im = np.concatenate(batches, axis=0).reshape((3, shape[0], shape[2], shape[2], 3)).transpose(
             [0, 2, 1, 3, 4]).reshape(
@@ -263,3 +263,20 @@ def make_gif_nei(H, model, sampler, orig, initial, fname, logprint):
         result.append(im)
     logger(fname)
     imageio.mimwrite(fname, result, fps=30)
+
+
+def unconditional_images_zero_first(H, model, sampler, shape, fname, logprint):
+    batches = []
+    temp_latent = torch.randn([shape[0], H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
+    for i in range(H.num_temperatures_visualize):
+        temp_latent.normal_()
+        temp_latent[:, :H.latent_dim//2] = min(1, i/10)
+        batches.append(sampler.sample(temp_latent, model))
+
+    n_rows = len(batches)
+    im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose(
+        [0, 2, 1, 3, 4]).reshape(
+        [n_rows * shape[2], shape[0] * shape[2], 3])
+
+    logprint(f'printing samples to {fname}')
+    imageio.imwrite(fname, im)

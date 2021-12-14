@@ -120,15 +120,15 @@ def main():
             break
         model = torch.nn.DataParallel(model, device_ids=H.devices)
 
-        # make_gif(H, model, sampler, f'{H.save_dir}/gif.mp4', logger)
-        # make_gif(H, model, sampler, f'{H.save_dir}/gif2.mp4', logger)
-        # make_gif(H, model, sampler, f'{H.save_dir}/gif3.mp4', logger)
+        make_gif(H, model, sampler, f'{H.save_dir}/gif.mp4', logger)
+        make_gif(H, model, sampler, f'{H.save_dir}/gif2.mp4', logger)
+        make_gif(H, model, sampler, f'{H.save_dir}/gif3.mp4', logger)
         if H.restore_latent_path:
             for to_vis in DataLoader(train_data, batch_size=8):
                 break
             latents = torch.load(H.restore_latent_path)
             make_gif_nei(H, model, sampler, to_vis[0],
-                            latents[0: to_vis[0].shape[0]].cuda(), f'{H.save_dir}/nei.mp4', logger)
+                            latents[0: to_vis[0].shape[0]].cuda(), f'{H.save_dir}/gif-nei.mp4', logger)
         unconditional_images_fix_first(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/first-{H.fname}', logger)
         unconditional_images_fix_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/second-{H.fname}', logger)
         unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-second-{H.fname}',
