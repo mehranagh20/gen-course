@@ -11,7 +11,7 @@ from torchvision.datasets import ImageFolder
 
 from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images, save_model, \
     restore_params, unconditional_images_fix_first, unconditional_images_fix_second, unconditional_images_zero_second, \
-    restore_log, make_gif
+    restore_log, make_gif, make_gif_nei
 from model import Model
 from sampler import Sampler
 
@@ -120,9 +120,13 @@ def main():
             break
         model = torch.nn.DataParallel(model, device_ids=H.devices)
 
-        make_gif(H, model, sampler, f'{H.save_dir}/gif.mp4', logger)
-        make_gif(H, model, sampler, f'{H.save_dir}/gif2.mp4', logger)
-        make_gif(H, model, sampler, f'{H.save_dir}/gif3.mp4', logger)
+        # make_gif(H, model, sampler, f'{H.save_dir}/gif.mp4', logger)
+        # make_gif(H, model, sampler, f'{H.save_dir}/gif2.mp4', logger)
+        # make_gif(H, model, sampler, f'{H.save_dir}/gif3.mp4', logger)
+        if H.resotre_latent_path:
+            latents = torch.load(H.restore_latent_path)
+            make_gif_nei(H, model, sampler, to_vis[0],
+                            latents[0: H.num_images_visualize], f'{H.save_dir}/nei.mp4', logger)
         unconditional_images_fix_first(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/first-{H.fname}', logger)
         unconditional_images_fix_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/second-{H.fname}', logger)
         unconditional_images_zero_second(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-secodn-{H.fname}',
