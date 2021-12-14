@@ -233,9 +233,10 @@ def make_gif(H, model, sampler, fname, logprint):
     result = []
     lat1 = torch.randn([1, H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
     lat2 = torch.randn([1, H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
+    lat2[:, :H.latent_dim//2] = lat1[:, :H.latent_dim//2][:]
     for i in range(1000):
         lat1 = torch.lerp(lat1, lat2, 1/1000)
         # temp_latent[:, :H.latent_dim//2] = min(1, i/10)
         result.append(sampler.sample(lat1, model).squeeze())
     logprint(f'printing gif to {fname}')
-    imageio.mimwrite(fname, result, fps=20)
+    imageio.mimwrite(fname, result, fps=60)
