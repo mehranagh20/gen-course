@@ -246,7 +246,7 @@ def make_gif_nei(H, model, sampler, orig, initial, fname, logprint):
     result = []
     shape = orig.shape
     lat = torch.randn([orig.shape[0], H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
-    lat[:, :H.latent_dim//2] = initial[:, :H.latent_dim][:]
+    lat[:, :H.latent_dim//2] = initial[:, :H.latent_dim//2][:]
     # lat2[:, :H.latent_dim//2] = lat1[:, :H.latent_dim//2][:]
     nns = sampler.sample(initial, model)
     batches = [sampler.sample_from_out(orig), nns]
