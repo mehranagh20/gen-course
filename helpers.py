@@ -261,4 +261,5 @@ def make_gif_nei(H, model, sampler, orig, initial, fname, logprint):
             [3 * shape[2], shape[0] * shape[2], 3])
         batches.pop()
         result.append(im)
+    logger(fname)
     imageio.mimwrite(fname, result, fps=30)
