@@ -268,16 +268,16 @@ def make_gif_nei(H, model, sampler, orig, initial, fname, logprint):
 def unconditional_images_zero_first_gif(H, model, sampler, shape, fname, logprint):
     results = []
     num = 200
-    lat1 = torch.zeros([shape[0], H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
-    lat2 = torch.ones([shape[0], H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
+    lat1 = torch.randn([shape[0] * H.num_temperatures_visualize, H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
+    lat2 = torch.randn([shape[0] * H.num_temperatures_visualize, H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
     lat1[:, :H.latent_dim // 2] = 0
     lat2[:, :H.latent_dim // 2] = 1
     lat1[:, H.latent_dim // 2:] = lat2[:, H.latent_dim // 2:][:]
     for i in range(num):
         batches = []
+        lat1 = torch.lerp(lat1, lat2, 1 / num)
         for i in range(H.num_temperatures_visualize):
-            lat1 = torch.lerp(lat1, lat2, 1 / num)
-            batches.append(sampler.sample(lat1, model))
+            batches.append(sampler.sample(lat1[i*shape[0]:(i+1)*shape[0]], model))
         n_rows = len(batches)
         im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose(
             [0, 2, 1, 3, 4]).reshape(
