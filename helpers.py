@@ -267,7 +267,7 @@ def make_gif_nei(H, model, sampler, orig, initial, fname, logprint):
 
 def unconditional_images_zero_first_gif(H, model, sampler, shape, fname, logprint):
     results = []
-    num = 1000
+    num = 600
     lat1 = torch.randn([shape[0] * H.num_temperatures_visualize, H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
     lat2 = torch.randn([shape[0] * H.num_temperatures_visualize, H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
     lat1[:, :H.latent_dim // 2] = 0
