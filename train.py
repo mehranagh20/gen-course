@@ -123,7 +123,7 @@ def main():
         make_gif(H, model, sampler, f'{H.save_dir}/gif.mp4', logger)
         make_gif(H, model, sampler, f'{H.save_dir}/gif2.mp4', logger)
         make_gif(H, model, sampler, f'{H.save_dir}/gif3.mp4', logger)
-        unconditional_images_zero_first_gif(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/gif-zero-first-{H.fname}',
+        unconditional_images_zero_first_gif(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/gif-zero-first.mp4',
                                         logger)
         if H.restore_latent_path:
             for to_vis in DataLoader(train_data, batch_size=8):
