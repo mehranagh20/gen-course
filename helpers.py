@@ -238,9 +238,8 @@ def make_gif(H, model, sampler, fname, logprint):
     #     result.append(sampler.sample(temp_latent, model).squeeze())
     # logprint(f'printing gif to {fname}')
     # imageio.mimwrite(fname, result, fps=30)
-    writer = imageio.get_writer(fname, fps=20)
+    # writer = imageio.get_writer(fname, fps=20)
     for i in range(H.num_temperatures_visualize):
         temp_latent.normal_()
         # temp_latent[:, :H.latent_dim//2] = min(1, i/10)
-        writer.append_data(sampler.sample(temp_latent, model).squeeze())
-    writer.close()
+        imageio.imwrite(fname, sampler.sample(temp_latent, model).squeeze())
