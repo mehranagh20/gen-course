@@ -175,6 +175,38 @@ def unconditional_images_zero_first(H, model, sampler, shape, fname, logprint):
     logprint(f'printing samples to {fname}')
     imageio.imwrite(fname, im)
 
+def _write_samples(batches, shape, fname, logprint):
+    n_rows = len(batches)
+    im = np.concatenate(batches, axis=0).reshape((n_rows, shape[0], shape[2], shape[2], 3)).transpose(
+        [0, 2, 1, 3, 4]).reshape(
+        [n_rows * shape[2], shape[0] * shape[2], 3])
+
+    logprint(f'printing samples to {fname}')
+    imageio.imwrite(fname, im)
+
+def generate_combine_latents(H, model, sampler, shape, fname, logprint):
+    batches = []
+    temp_latent = torch.randn([shape[0], H.latent_dim], dtype=torch.float32).cuda(device=H.devices[0])
+
+    # Generate 4 images, 2 random, 2 combined (content1 + style2, and content2 + style1)
+    temp_latent.normal_()
+    temp_latent1 = temp_latent.clone()
+    batches.append(sampler.sample(temp_latent, model))
+
+    temp_latent.normal_()
+    temp_latent2 = temp_latent.clone()
+    batches.append(sampler.sample(temp_latent, model))
+
+    temp_latent[:, :H.latent_dim//2] = temp_latent1[:, :H.latent_dim//2] # First part
+    temp_latent[:, H.latent_dim//2:] = temp_latent2[:, H.latent_dim//2:] # Second part
+    batches.append(sampler.sample(temp_latent, model))
+
+    temp_latent[:, :H.latent_dim//2] = temp_latent2[:, :H.latent_dim//2] # First part
+    temp_latent[:, H.latent_dim//2:] = temp_latent1[:, H.latent_dim//2:] # Second part
+    batches.append(sampler.sample(temp_latent, model))
+
+    _write_samples(batches, shape, fname, logprint)
+
 def restore_params(model, path, map_ddp=True, map_cpu=False):
     if not path:
         return
