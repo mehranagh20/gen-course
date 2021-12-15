@@ -198,11 +198,11 @@ def generate_combine_latents(H, model, sampler, shape, fname, logprint):
     batches.append(sampler.sample(temp_latent, model))
 
     temp_latent[:, :H.latent_dim//2] = temp_latent1[:, :H.latent_dim//2] # First part
-    temp_latent[:, H.latent_dim//2:] = temp_latent2[:, :H.latent_dim//2] # Second part
+    temp_latent[:, H.latent_dim//2:] = temp_latent2[:, H.latent_dim//2:] # Second part
     batches.append(sampler.sample(temp_latent, model))
 
     temp_latent[:, :H.latent_dim//2] = temp_latent2[:, :H.latent_dim//2] # First part
-    temp_latent[:, H.latent_dim//2:] = temp_latent1[:, :H.latent_dim//2] # Second part
+    temp_latent[:, H.latent_dim//2:] = temp_latent1[:, H.latent_dim//2:] # Second part
     batches.append(sampler.sample(temp_latent, model))
 
     _write_samples(batches, shape, fname, logprint)
