@@ -12,6 +12,7 @@ from torchvision.datasets import ImageFolder
 from helpers import set_up_hyperparams, generate_for_NN, ZippedDataset, linear_warmup, generate_images, save_model, \
     restore_params, unconditional_images_fix_first, unconditional_images_fix_second, unconditional_images_zero_second, \
     restore_log, make_gif, make_gif_nei, unconditional_images_zero_first, unconditional_images_zero_first_gif
+from helpers import generate_combine_latents
 from model import Model
 from sampler import Sampler
 
@@ -92,6 +93,20 @@ def train(H, model, train_data, logger, sampler):
                     save_model(os.path.join(H.save_dir, f'iter-{iter_num}'), model, sampler.selected_latents, optimizer,
                                H)
 
+def save_train(H, train_data, logger):
+  # Save the training data with specified seed
+  train_folder = 'train_set'
+  os.makedirs(train_folder)
+  sampler = Sampler(H, H.n_split)
+
+  comb_dataset = ZippedDataset(train_data, TensorDataset(sampler.selected_latents))
+  data_loader = DataLoader(comb_dataset, batch_size=H.n_batch, pin_memory=True, shuffle=True)
+  for ind, batch in enumerate(data_loader):
+    x = batch[0][0].cuda(device=H.devices[0])
+
+    for ind_img, img in enumerate(x):
+      save_image(img, os.path.join(train_folder, f"img_{ind}_{ind_img}.png"))
+
 
 def main():
     H, logger = set_up_hyperparams()
@@ -115,7 +130,9 @@ def main():
     sampler = Sampler(H, H.n_split)
 
     restore_params(model, H.restore_path, map_cpu=True)
-    if H.test_eval:
+    if H.save_train:
+        save_train(H, train_data, logger)
+    elif H.test_eval:
         for to_vis in DataLoader(train_data, batch_size=12):
             break
         model = torch.nn.DataParallel(model, device_ids=H.devices)
@@ -137,11 +154,10 @@ def main():
                                          logger)
         unconditional_images_zero_first(H, model, sampler, to_vis[0].shape, f'{H.save_dir}/zero-first-{H.fname}',
                                          logger)
-
+        generate_combine_latents(H, model, sampler, to_vis[0].shape, f"{H.save_dir}/combine-latents-{H.fname}", logger)
     else:
         model = torch.nn.DataParallel(model, device_ids=H.devices)
         train(H, model, train_data, logger, sampler)
-
 
 if __name__ == "__main__":
     main()
